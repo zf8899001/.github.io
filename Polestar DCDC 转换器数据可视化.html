@@ -1,0 +1,536 @@
+<!DOCTYPE html>  
+<html lang="zh-CN">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Polestar DCDC 转换器数据可视化</title>  
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
+    <style>  
+        body {  
+            font-family: 'Arial', sans-serif;  
+            margin: 0;  
+            padding: 20px;  
+            background-color: #f5f5f5;  
+        }  
+        .container {  
+            max-width: 1200px;  
+            margin: 0 auto;  
+            background-color: white;  
+            padding: 20px;  
+            border-radius: 10px;  
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);  
+        }  
+        h1, h2, h3 {  
+            color: #333;  
+        }  
+        .chart-container {  
+            margin: 30px 0;  
+            padding: 20px;  
+            background-color: white;  
+            border-radius: 8px;  
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);  
+        }  
+        .chart-row {  
+            display: flex;  
+            flex-wrap: wrap;  
+            gap: 20px;  
+            justify-content: space-between;  
+        }  
+        .chart-box {  
+            flex: 1;  
+            min-width: 300px;  
+            margin-bottom: 20px;  
+        }  
+        table {  
+            width: 100%;  
+            border-collapse: collapse;  
+            margin: 20px 0;  
+        }  
+        table, th, td {  
+            border: 1px solid #ddd;  
+        }  
+        th, td {  
+            padding: 12px;  
+            text-align: left;  
+        }  
+        th {  
+            background-color: #f2f2f2;  
+        }  
+        tr:nth-child(even) {  
+            background-color: #f9f9f9;  
+        }  
+        .card {  
+            border: 1px solid #ddd;  
+            border-radius: 8px;  
+            padding: 16px;  
+            margin-bottom: 20px;  
+            background-color: white;  
+        }  
+        .card-header {  
+            font-size: 18px;  
+            margin-bottom: 10px;  
+            font-weight: bold;  
+            color: #4a6fd1;  
+        }  
+        .card-body {  
+            color: #555;  
+        }  
+        .specs-grid {  
+            display: grid;  
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));  
+            gap: 20px;  
+            margin: 20px 0;  
+        }  
+        .highlight {  
+            background-color: #e8f4fd;  
+            border-left: 4px solid #4a90e2;  
+            padding: 8px 12px;  
+        }  
+    </style>  
+</head>  
+<body>  
+    <div class="container">  
+        <h1>Polestar DCDC 转换器数据可视化</h1>  
+        
+        <!-- 主要规格卡片 -->  
+        <div class="card">  
+            <div class="card-header">产品总览</div>  
+            <div class="card-body">  
+                <p>Polestar DCDC是一款高性能高低压转换模块(HLCM)，集成了两个独立的DCDC转换器。它专为Polestar 2025车型设计，可提供持续4.2kW的功率输出，短时可达5.5kW。产品采用双通道设计，每个通道可独立提供2.1kW功率，确保关键系统的安全性和冗余性。</p>  
+                <div class="highlight">  
+                    工作温度范围：-40°C至55°C | 尺寸：305×250×52mm | 重量：<4.5kg | 最高效率：95%  
+                </div>  
+            </div>  
+        </div>  
+
+        <!-- 对比图表 -->  
+        <div class="chart-container">  
+            <h2>1. 效率和性能对比</h2>  
+            <div class="chart-row">  
+                <div class="chart-box">  
+                    <h3>效率-负载曲线图</h3>  
+                    <canvas id="efficiencyChart"></canvas>  
+                </div>  
+                <div class="chart-box">  
+                    <h3>功率密度对比</h3>  
+                    <canvas id="powerDensityChart"></canvas>  
+                </div>  
+            </div>  
+            <div class="chart-row">  
+                <div class="chart-box">  
+                    <h3>关键参数对比</h3>  
+                    <canvas id="keyParamsChart"></canvas>  
+                </div>  
+                <div class="chart-box">  
+                    <h3>温度-功率关系图</h3>  
+                    <canvas id="tempPowerChart"></canvas>  
+                </div>  
+            </div>  
+        </div>  
+
+        <!-- 雷达图 -->  
+        <div class="chart-container">  
+            <h2>2. 参数雷达图</h2>  
+            <div class="chart-row">  
+                <div class="chart-box">  
+                    <h3>多维度性能展示</h3>  
+                    <canvas id="performanceRadarChart"></canvas>  
+                </div>  
+                <div class="chart-box">  
+                    <h3>应用场景适用性</h3>  
+                    <canvas id="applicationRadarChart"></canvas>  
+                </div>  
+            </div>  
+        </div>  
+
+        <!-- 详细规格表 -->  
+        <div class="chart-container">  
+            <h2>3. 详细规格参数</h2>  
+            
+            <h3>输入/输出电压参数</h3>  
+            <table>  
+                <thead>  
+                    <tr>  
+                        <th>参数名称</th>  
+                        <th>Polestar DCDC</th>  
+                        <th>竞品A</th>  
+                        <th>竞品B</th>  
+                    </tr>  
+                </thead>  
+                <tbody>  
+                    <tr>  
+                        <td>输入电压范围 (V)</td>  
+                        <td>190V-450V</td>  
+                        <td>180V-420V</td>  
+                        <td>200V-450V</td>  
+                    </tr>  
+                    <tr>  
+                        <td>输出电压 (V)</td>  
+                        <td>11.6V-15.3V</td>  
+                        <td>10.8V-16V</td>  
+                        <td>9V-16V</td>  
+                    </tr>  
+                    <tr>  
+                        <td>输入欠压保护 (V)</td>  
+                        <td>190V</td>  
+                        <td>180V</td>  
+                        <td>200V</td>  
+                    </tr>  
+                </tbody>  
+            </table>  
+
+            <h3>功率和电流参数</h3>  
+            <table>  
+                <thead>  
+                    <tr>  
+                        <th>参数名称</th>  
+                        <th>Polestar DCDC</th>  
+                        <th>竞品A</th>  
+                        <th>竞品B</th>  
+                    </tr>  
+                </thead>  
+                <tbody>  
+                    <tr>  
+                        <td>最大输出功率 (W)</td>  
+                        <td>5.5kW(瞬态)、4.2kW(持续)</td>  
+                        <td>3kW</td>  
+                        <td>4kW</td>  
+                    </tr>  
+                    <tr>  
+                        <td>输出电流 (A)</td>  
+                        <td>最大362A</td>  
+                        <td>250A</td>  
+                        <td>300A</td>  
+                    </tr>  
+                    <tr>  
+                        <td>过流保护点 (A)</td>  
+                        <td>300A</td>  
+                        <td>275A</td>  
+                        <td>325A</td>  
+                    </tr>  
+                </tbody>  
+            </table>  
+
+            <h3>效率参数</h3>  
+            <table>  
+                <thead>  
+                    <tr>  
+                        <th>参数名称</th>  
+                        <th>Polestar DCDC</th>  
+                        <th>竞品A</th>  
+                        <th>竞品B</th>  
+                    </tr>  
+                </thead>  
+                <tbody>  
+                    <tr>  
+                        <td>最高效率 (%)</td>  
+                        <td>95%</td>  
+                        <td>94%</td>  
+                        <td>93%</td>  
+                    </tr>  
+                    <tr>  
+                        <td>轻载效率 (25%负载) (%)</td>  
+                        <td>90%</td>  
+                        <td>88%</td>  
+                        <td>87%</td>  
+                    </tr>  
+                    <tr>  
+                        <td>满载效率 (%)</td>  
+                        <td>93%</td>  
+                        <td>91%</td>  
+                        <td>90%</td>  
+                    </tr>  
+                </tbody>  
+            </table>  
+        </div>  
+
+        <!-- 应用场景 -->  
+        <div class="chart-container">  
+            <h2>4. 应用场景与解决方案</h2>  
+            <div class="specs-grid">  
+                <div class="card">  
+                    <div class="card-header">整车系统集成</div>  
+                    <div class="card-body">  
+                        <p>Polestar DCDC转换器可集成到Polestar 2025车型的高压系统中，提供从400V高压系统到12V低压系统的稳定转换。双通道独立设计确保关键系统如转向和制动的可靠供电。</p>  
+                    </div>  
+                </div>  
+                <div class="card">  
+                    <div class="card-header">安全冗余设计</div>  
+                    <div class="card-body">  
+                        <p>采用FIC Class C级别的功能安全设计，内置完整的保护功能套件，包括过流保护、过压保护、欠压保护和过温保护，最大程度保障车辆安全。</p>  
+                    </div>  
+                </div>  
+                <div class="card">  
+                    <div class="card-header">热管理性能</div>  
+                    <div class="card-body">  
+                        <p>产品具备多级温度管理策略，在T3(65°C)开始功率降级，T4(85°C)触发过温保护，确保在极端条件下仍能提供基本功能。默认冷却液流量需求为0.6L/min。</p>  
+                    </div>  
+                </div>  
+                <div class="card">  
+                    <div class="card-header">车规级环境适应性</div>  
+                    <div class="card-body">  
+                        <p>符合ISO 16750标准要求，工作温度范围-40°C至55°C，具备IP5K2/IP6K7防护等级，可适应各种恶劣环境条件。</p>  
+                    </div>  
+                </div>  
+            </div>  
+        </div>  
+    </div>  
+
+    <script>  
+        // 效率-负载曲线图  
+        const effCtx = document.getElementById('efficiencyChart').getContext('2d');  
+        const efficiencyChart = new Chart(effCtx, {  
+            type: 'line',  
+            data: {  
+                labels: ['10%', '25%', '50%', '75%', '100%'],  
+                datasets: [{  
+                    label: 'Polestar DCDC',  
+                    data: [80, 90, 95, 94, 93],  
+                    borderColor: '#4a90e2',  
+                    tension: 0.2,  
+                    fill: false  
+                }, {  
+                    label: '竞品A',  
+                    data: [75, 88, 94, 92, 91],  
+                    borderColor: '#ff6b6b',  
+                    tension: 0.2,  
+                    fill: false  
+                }, {  
+                    label: '竞品B',  
+                    data: [78, 87, 93, 91, 90],  
+                    borderColor: '#50e3c2',  
+                    tension: 0.2,  
+                    fill: false  
+                }]  
+            },  
+            options: {  
+                scales: {  
+                    y: {  
+                        min: 70,  
+                        max: 100,  
+                        title: {  
+                            display: true,  
+                            text: '效率 (%)'  
+                        }  
+                    },  
+                    x: {  
+                        title: {  
+                            display: true,  
+                            text: '负载百分比'  
+                        }  
+                    }  
+                },  
+                plugins: {  
+                    title: {  
+                        display: true,  
+                        text: 'DCDC转换器效率随负载变化曲线'  
+                    }  
+                }  
+            }  
+        });  
+
+        // 功率密度对比图  
+        const pdCtx = document.getElementById('powerDensityChart').getContext('2d');  
+        const powerDensityChart = new Chart(pdCtx, {  
+            type: 'bar',  
+            data: {  
+                labels: ['Polestar DCDC', '竞品A', '竞品B', '博世', '法雷奥'],  
+                datasets: [{  
+                    label: '功率密度 (kW/kg)',  
+                    data: [1.22, 0.58, 0.83, 0.72, 0.87],  
+                    backgroundColor: [  
+                        '#4a90e2', '#ff6b6b', '#50e3c2', '#feca57', '#6c5ce7'  
+                    ]  
+                }]  
+            },  
+            options: {  
+                scales: {  
+                    y: {  
+                        beginAtZero: true,  
+                        title: {  
+                            display: true,  
+                            text: '功率密度 (kW/kg)'  
+                        }  
+                    }  
+                },  
+                plugins: {  
+                    title: {  
+                        display: true,  
+                        text: '各品牌DCDC转换器功率密度对比'  
+                    }  
+                }  
+            }  
+        });  
+
+        // 关键参数对比图  
+        const kpCtx = document.getElementById('keyParamsChart').getContext('2d');  
+        const keyParamsChart = new Chart(kpCtx, {  
+            type: 'bar',  
+            data: {  
+                labels: ['最大功率(kW)', '最高效率(%)', '最大电流(A)', '工作温度范围(°C)'],  
+                datasets: [{  
+                    label: 'Polestar DCDC',  
+                    data: [4.2, 95, 362, 95],  
+                    backgroundColor: '#4a90e2'  
+                }, {  
+                    label: '竞品A',  
+                    data: [3, 94, 250, 90],  
+                    backgroundColor: '#ff6b6b'  
+                }, {  
+                    label: '竞品B',  
+                    data: [4, 93, 300, 90],  
+                    backgroundColor: '#50e3c2'  
+                }]  
+            },  
+            options: {  
+                scales: {  
+                    y: {  
+                        beginAtZero: true,  
+                        title: {  
+                            display: true,  
+                            text: '参数值 (相对单位)'  
+                        }  
+                    }  
+                },  
+                plugins: {  
+                    title: {  
+                        display: true,  
+                        text: '关键参数对比'  
+                    }  
+                }  
+            }  
+        });  
+
+        // 温度-功率关系图  
+        const tpCtx = document.getElementById('tempPowerChart').getContext('2d');  
+        const tempPowerChart = new Chart(tpCtx, {  
+            type: 'line',  
+            data: {  
+                labels: ['-40°C', '-35°C', '0°C', '25°C', '55°C', '65°C', '85°C'],  
+                datasets: [{  
+                    label: 'Polestar DCDC功率',  
+                    data: [5.5, 5.5, 5.5, 5.5, 4.2, 4.2, 0.7],  
+                    borderColor: '#4a90e2',  
+                    backgroundColor: 'rgba(74, 144, 226, 0.2)',  
+                    tension: 0.4,  
+                    fill: true,  
+                    pointRadius: 5,  
+                    pointBackgroundColor: '#4a90e2'  
+                }]  
+            },  
+            options: {  
+                scales: {  
+                    y: {  
+                        title: {  
+                            display: true,  
+                            text: '功率 (kW)'  
+                        }  
+                    },  
+                    x: {  
+                        title: {  
+                            display: true,  
+                            text: '温度'  
+                        }  
+                    }  
+                },  
+                plugins: {  
+                    title: {  
+                        display: true,  
+                        text: '温度-功率关系图'  
+                    }  
+                }  
+            }  
+        });  
+
+        // 多维度性能雷达图  
+        const prCtx = document.getElementById('performanceRadarChart').getContext('2d');  
+        const performanceRadarChart = new Chart(prCtx, {  
+            type: 'radar',  
+            data: {  
+                labels: ['功率', '效率', '响应时间', '电压范围', '温度适应性', '功率密度'],  
+                datasets: [{  
+                    label: 'Polestar DCDC',  
+                    data: [95, 95, 90, 85, 95, 100],  
+                    backgroundColor: 'rgba(74, 144, 226, 0.2)',  
+                    borderColor: '#4a90e2',  
+                    pointBackgroundColor: '#4a90e2'  
+                }, {  
+                    label: '竞品A',  
+                    data: [70, 94, 75, 80, 80, 50],  
+                    backgroundColor: 'rgba(255, 107, 107, 0.2)',  
+                    borderColor: '#ff6b6b',  
+                    pointBackgroundColor: '#ff6b6b'  
+                }, {  
+                    label: '竞品B',  
+                    data: [85, 93, 80, 85, 80, 70],  
+                    backgroundColor: 'rgba(80, 227, 194, 0.2)',  
+                    borderColor: '#50e3c2',  
+                    pointBackgroundColor: '#50e3c2'  
+                }]  
+            },  
+            options: {  
+                scales: {  
+                    r: {  
+                        angleLines: {  
+                            display: true  
+                        },  
+                        suggestedMin: 0,  
+                        suggestedMax: 100  
+                    }  
+                },  
+                plugins: {  
+                    title: {  
+                        display: true,  
+                        text: '多维度性能雷达图'  
+                    }  
+                }  
+            }  
+        });  
+
+        // 应用场景适用性雷达图  
+        const arCtx = document.getElementById('applicationRadarChart').getContext('2d');  
+        const applicationRadarChart = new Chart(arCtx, {  
+            type: 'radar',  
+            data: {  
+                labels: ['新能源乘用车', '商用车辆', '高端车型', '极端环境', '安全关键系统', '长寿命应用'],  
+                datasets: [{  
+                    label: 'Polestar DCDC',  
+                    data: [100, 90, 95, 90, 95, 90],  
+                    backgroundColor: 'rgba(74, 144, 226, 0.2)',  
+                    borderColor: '#4a90e2',  
+                    pointBackgroundColor: '#4a90e2'  
+                }, {  
+                    label: '竞品A',  
+                    data: [85, 80, 80, 75, 80, 75],  
+                    backgroundColor: 'rgba(255, 107, 107, 0.2)',  
+                    borderColor: '#ff6b6b',  
+                    pointBackgroundColor: '#ff6b6b'  
+                }, {  
+                    label: '竞品B',  
+                    data: [90, 85, 85, 85, 85, 80],  
+                    backgroundColor: 'rgba(80, 227, 194, 0.2)',  
+                    borderColor: '#50e3c2',  
+                    pointBackgroundColor: '#50e3c2'  
+                }]  
+            },  
+            options: {  
+                scales: {  
+                    r: {  
+                        angleLines: {  
+                            display: true  
+                        },  
+                        suggestedMin: 0,  
+                        suggestedMax: 100  
+                    }  
+                },  
+                plugins: {  
+                    title: {  
+                        display: true,  
+                        text: '应用场景适用性雷达图'  
+                    }  
+                }  
+            }  
+        });  
+    </script>  
+</body>  
+</html>  
